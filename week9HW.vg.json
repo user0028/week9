@@ -1,0 +1,36 @@
+{
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "title": "Death from Covid in Asia",
+    "width": 800,
+    "height": 600,
+    "projection": {"type": "equirectangular"},
+    "data": {
+        "url": "https://raw.githubusercontent.com/user0028/week9/main/asia.geo.topojson",
+        "format": {"type": "topojson", "feature": "asia.geo"}
+    },
+    "transform": [
+        {
+            "lookup": "properties.name",
+            "from": {
+                "data": {
+                    "url": "https://raw.githubusercontent.com/user0028/week9/main/Latest%20Covid-19%20Data%20in%20Asia.csv"
+                },
+                "key": "Country",
+                "fields": ["DeathsPer1MPopulation"]
+            }
+        },
+        {"calculate": "datum.DeathsPer1MPopulation", "as": "Total Deaths/1M Population"}
+    ],
+    "mark": {"type": "geoshape"},
+    "encoding": {
+        "color": {
+            "field": "Total Deaths/1M Population",
+            "type": "quantitative",
+            "scale": {"scheme": "reds"}
+        },
+        "tooltip": [
+            {"field": "properties.name", "type": "nominal", "title": "Country"},
+            {"field": "Total Deaths/1M Population", "type": "quantitative"}
+        ]
+    }
+}
