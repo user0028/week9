@@ -1,0 +1,143 @@
+{
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "width": 700, "height": 400,
+    "background": "#ffffff",
+    "data": {"url": "https://raw.githubusercontent.com/user0028/visualization2/main/Data/owid-covid-data-complete%20-%20Copy.csv"},
+    "params": [
+        {
+          "name": "Continent_selection",
+          "bind": {
+            "input": "select",
+            "options": [
+              null,
+              
+              "Africa",
+              "Asia",
+              "Europe",
+              "North America",
+              "Oceania",
+              "South America"
+            ],
+            "labels": [
+              "All",
+              
+              "Africa",
+              "Asia",
+              "Europe",
+              "North America",
+              "Oceania",
+              "South America"
+            ],
+            "name": "Continent Selection  "
+          }
+        }
+      ],
+    "transform": [
+        {
+            "filter": "Continent_selection == null || datum.continent == Continent_selection"
+        },
+        {
+          "calculate": "toNumber(datum.people_vaccinated_per_hundred)",
+          "as": "people_fully_vaccinated_per_hundred"
+        },
+        {
+            "calculate": "toNumber(datum.new_deaths_smoothed_per_million)",
+            "as": "new_deaths_smoothed_per_million"
+          },
+        {
+            "aggregate": [
+                {"op": "max", "field": "new_deaths_smoothed_per_million", "as": "Deaths"}, 
+                {"op": "max", "field": "people_fully_vaccinated_per_hundred", "as": "VAX"},
+                {"op": "max", "field": "population", "as": "POP"}
+              ],
+              "groupby": ["continent",  "location"]
+        }
+    ],
+    "encoding": {
+      "y": {
+        "field": "Deaths",
+        "title": "Deaths Per Million",
+        "scale": {"type": "sqrt", "domain": [0, 100]},
+        "axis": {"tickCount": 10}
+      },
+      "x": {
+        "field": "VAX",
+        "title": "People Vaccinated Per Hundred",
+        "scale": {"type": "linear", "domain": [0, 100]},
+        "axis": {"tickCount": 10}
+      }
+    },
+    "layer": [
+      {
+        "mark": "circle",
+        "encoding": {
+          "size":{
+            "field": "POP",
+            "type": "quantitative",
+            "scale": {
+                "type": "threshold",
+                "domain": [1000000, 10000000, 50000000, 100000000, 500000000],
+                "range": [10, 50, 150, 200, 300, 400]
+                }
+          },
+          "color":{
+            "field": "continent",
+            "type": "nominal",
+            "scale": {
+              "domain": [
+                "Africa",
+                "Asia",
+                "Europe",
+                "North America",
+                "Oceania",
+                "South America"
+              ],
+              "range": [
+                "#1f77b4",
+                "#ff7f0e",
+                "#2ca02c",
+                "#d62728",
+                "#9467bd",
+                "#8c564b"
+              ]
+            }
+          },
+          "tooltip": [
+            {"field": "Deaths"},
+            {"field": "location"},
+            {"field": "VAX"},
+            {"field": "POP"}
+          ]
+        }
+      },
+      {
+        "mark": {
+          "type": "text",
+          "align": "right",
+          "baseline": "middle",
+          "dx": -12,
+          "fontSize": 11.5,
+          "fontStyle": "italic"
+        },
+        "encoding": {
+          "text": {"field": "location", "type": "nominal"},
+          "color": {"value": "black"},
+          "opacity": {
+            "condition": {
+              "test": " datum['location'] == 'China' || datum['location'] == 'Singapore' || datum['location'] == 'Australia' || datum['location'] == 'New Zealand' || datum['location'] == 'Italy' || datum['location'] == 'India' || datum['location'] == 'United States'",
+              "value": 1
+            },
+            "value": 0
+          },
+          "tooltip": [
+            {"field": "location", "type": "nominal"},
+            {"field": "Deaths", "type": "quantitative", "format": ","},
+            {"field": "VAX", "type": "quantitative", "format": ","},
+            {"field": "POP", "type": "quantitative", "format": ","}
+          ]
+           
+         
+        }
+      }
+    ]
+}
